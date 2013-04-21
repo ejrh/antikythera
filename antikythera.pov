@@ -141,19 +141,26 @@ difference {
 #declare BCDist = B2Teeth + C1Teeth;
 #declare CDDist = C2Teeth + D1Teeth;
 #declare DBDist = D2Teeth + B3Teeth;
-#declare CAngle = acos((BCDist*BCDist + DBDist*DBDist - CDDist*CDDist)/(2*BCDist*DBDist));
+#declare BCAngle = acos((BCDist*BCDist + DBDist*DBDist - CDDist*CDDist)/(2*BCDist*DBDist));
+#declare CDAngle = acos((BCDist*BCDist + CDDist*CDDist - DBDist*DBDist)/(2*BCDist*CDDist));
+#declare DBAngle = acos((CDDist*CDDist + DBDist*DBDist - BCDist*BCDist)/(2*CDDist*DBDist));
 
-#declare CPosX = -BCDist*sin(CAngle)/1000;
-#declare CPosY = BCDist*cos(CAngle)/1000;
+#declare CPosX = -BCDist*sin(BCAngle)/1000;
+#declare CPosY = BCDist*cos(BCAngle)/1000;
 #declare DPosX = 0;
 #declare DPosY = DBDist/1000;
 
+#macro NextAngle(Input, FromTeeth, ToTeeth, RelAngle)
+    #local teeth_past = FromTeeth*RelAngle/360;
+    -Input*FromTeeth/ToTeeth + 180-RelAngle - (teeth_past+0.5)/ToTeeth*360
+#end
+
 #declare B2Angle = clock*360;
-#declare C2Angle = -B2Angle*B2Teeth/C1Teeth;
-#declare D2Angle = -C2Angle*C2Teeth/D1Teeth;
-#declare B3Angle = -D2Angle*D2Teeth/B3Teeth;
-#declare A2Angle = B3Angle*B4Teeth/A2Teeth;
-#declare B5Angle = -A2Angle*A2Teeth/B5Teeth;
+#declare C2Angle = NextAngle(B2Angle, B2Teeth, C1Teeth, degrees(BCAngle));
+#declare D2Angle = NextAngle(C2Angle, C2Teeth, D1Teeth, degrees(CDAngle));
+#declare B3Angle = NextAngle(D2Angle, D2Teeth, B3Teeth, 90+degrees(DBAngle));
+#declare A2Angle = -NextAngle(B3Angle, B4Teeth, A2Teeth, 0);
+#declare B5Angle = NextAngle(A2Angle, A2Teeth, B5Teeth, 0);
 
 #declare BoxTop = -0.15;
 #declare BoxBottom = 0.3;
