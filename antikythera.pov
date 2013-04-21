@@ -65,6 +65,7 @@ light_source {
 union {
     #local base_radius = Radius-ToothScale;
     #local base_offset = tan(pi/6)*2*ToothScale;
+    #local tooth_radius = sqrt(base_radius*base_radius - base_offset*base_offset);
     GearBase(base_radius, Depth, Thickness, AxisRadius, Name)
     
     #local tooth = prism {
@@ -74,7 +75,7 @@ union {
     
     #local i = 0;
     #while (i < Teeth)
-        object { tooth translate base_radius*z rotate i/Teeth*360*y }
+        object { tooth translate tooth_radius*z rotate i/Teeth*360*y }
         #local i = i + 1;
     #end
 }
