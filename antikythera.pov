@@ -47,16 +47,16 @@ light_source {
             #end
         }
         #local label = text {
-            ttf "courbd.ttf", Name, Depth+0.002, 0.0
+            ttf "courbd.ttf", Name, 0.002, 0.0
             rotate 90*x
             rotate -90*y
             scale <Thickness,1,Thickness>
         }
         #local minext = min_extent(label);
         #local maxext = max_extent(label);
-        #local w = maxext.x - minext.x;
-        #local h = maxext.z - minext.z;
-        object { label translate <h/3,Depth+0.001,(Radius-AxisRadius-w)/2> }
+        #local mp1 = (maxext.x + minext.x)/2;
+        #local mp2 = (maxext.z + minext.z)/2;
+        object { label translate <-mp1,Depth+0.001,(Radius+AxisRadius)/2-mp2> }
     }
     
 #end
