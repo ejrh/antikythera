@@ -96,7 +96,7 @@ union {
     
     #local i = 0;
     #while (i < Teeth)
-        object { tooth translate (Radius-Depth/2)*z rotate i/Teeth*360*y }
+        object { tooth translate 0.25*Depth*y translate (Radius-Depth/2)*z rotate i/Teeth*360*y }
         #local i = i + 1;
     #end
 }
@@ -170,6 +170,10 @@ difference {
 #declare E6Teeth = 50;
 #declare E1Teeth = 32;
 #declare B3Teeth = 32;
+#declare B0Teeth = 20;
+#declare MB3Teeth = B0Teeth;
+#declare MB2Teeth = 15;
+#declare MA1Teeth = MB2Teeth;
 
 #declare K1K2Dist = 0.0025;
 #declare KPinDist = 0.04;
@@ -186,7 +190,7 @@ difference {
     -Input*FromTeeth/ToTeeth + 180-RelAngle - (teeth_past+0.5)/ToTeeth*360
 #end
 
-#declare B2Angle = clock*360;
+#declare B2Angle = clock*360/10;
 #declare C2Angle = NextAngle(B2Angle, B2Teeth, C1Teeth, 0);
 #declare D2Angle = NextAngle(C2Angle, C2Teeth, D1Teeth, 0);
 #declare E2Angle = NextAngle(D2Angle, D2Teeth, E2Teeth, 0);
@@ -202,6 +206,10 @@ difference {
 #declare E6Angle = NextAngle(K2Angle, K2Teeth, E6Teeth, 0) + E3Angle;
 #declare E1Angle = E6Angle;
 #declare B3Angle = NextAngle(E1Angle, E1Teeth, B3Teeth, 0);
+#declare B0Angle = B2Angle;
+#declare MB3Angle = NextAngle(B0Angle, B0Teeth, MB3Teeth, 0) + B3Angle;
+#declare MB2Angle = MB3Angle;
+#declare MA1Angle = -NextAngle(MB2Angle, MB2Teeth, MA1Teeth, 0);
 
 #declare BCDist = (B2Teeth + C1Teeth)/1000;
 #declare CDDist = (C2Teeth + D1Teeth)/1000;
@@ -216,6 +224,7 @@ difference {
 #declare DEBearing = -BCBearing - TriangleAngle(BCDist+CDDist, DEDist, EBDist);
 #declare BEBearing = BCBearing + TriangleAngle(BCDist+CDDist, EBDist, DEDist);
 #declare BLBearing = BCBearing + 2*TriangleAngle(BCDist+CDDist, EBDist, DEDist);
+#declare BMBDist = (B0Teeth + MB3Teeth)/1000; 
 
 #declare BPosX = 0;
 #declare BPosY = 0;
@@ -247,6 +256,8 @@ difference {
 #declare BoxThickness = 0.01;
 #declare BoxDepth = 0.2;
 
+#declare PlanetHeight = 0.2;
+
 union {
     box { <BoxLeft,0,BoxTop>, <BoxRight,BoxThickness,BoxBottom> }
     box { <BoxLeft,BoxThickness,BoxTop>, <BoxRight,BoxDepth,BoxTop-BoxThickness> }
@@ -275,16 +286,27 @@ union {
     cylinder { <DPosX,0.07,DPosY>, <DPosX,0.11,DPosY>, 0.005 }
     cylinder { <EPosX,0.01,EPosY>, <EPosX,0.10,EPosY>, 0.005 }
     difference {
-        cylinder { <BPosX,0.09,0>, <BPosY,0.13,0>, 0.01 }
-        cylinder { <BPosX,0.09-0.001,0>, <BPosY,0.13+0.001,0>, 0.005 }
+        cylinder { <BPosX,0.09,0>, <BPosY,0.19,0>, 0.01 }
+        cylinder { <BPosX,0.09-0.001,0>, <BPosY,0.19+0.001,0>, 0.005 }
     }
     cylinder { <LPosX,0.09,LPosY>, <LPosX,0.12,LPosY>, 0.005 }
     cylinder { <MPosX,0.01,MPosY>, <MPosX,0.11,MPosY>, 0.005 }
 
-    cylinder { <0,0.1975,0>, <0,0.1975,0.06>, 0.0025 rotate B3Angle*y }
-    sphere { <0,0.1975,0.06>, 0.01 rotate B3Angle*y texture { T_Silver_5E } }
-    cylinder { <0,0.12,0.085>, <0,0.1975,0.085>, 0.0025 rotate B2Angle*y }
-    sphere { <0,0.1975,0.085>, 0.01 rotate B2Angle*y texture { T_Gold_1E } }
+    cylinder { <0,PlanetHeight,0>, <0,PlanetHeight,0.11>, 0.0025 rotate B3Angle*y }
+    union {
+        difference {
+            sphere { <0,0,0>, 0.01 texture { T_Silver_5E } }
+            plane { -y,0 }
+        }
+        difference {
+            sphere { <0,0,0>, 0.01 texture { T_Chrome_1A } }
+            plane { y,0 }
+        }
+        rotate MA1Angle*z
+        translate <0,PlanetHeight,0.11> rotate B3Angle*y
+    }
+    cylinder { <0,0.12,0.135>, <0,PlanetHeight,0.135>, 0.0025 rotate B2Angle*y }
+    sphere { <0,PlanetHeight,0.135>, 0.01 rotate B2Angle*y texture { T_Gold_1E } }
 
     texture { T_Brass_5C }
 }
@@ -308,7 +330,7 @@ union {
     pigment { White } 
 }*/
 
-object { Zodiac(0.1, 0.15, 0.002) translate <0,0.1975-0.001,0> texture { T_Brass_5A } }
+object { Zodiac(0.15 0.2, 0.002) translate <0,PlanetHeight-0.001,0> texture { T_Brass_5A } }
 
 union {
     object { Gear(B1Teeth/1000, B1Teeth, 0.0025, 0.01, B1Teeth/10000, 0.01, "B1") rotate B2Angle*y translate <0,0.12,0> }
@@ -358,6 +380,17 @@ union {
     object { Gear((M1Teeth+5)/1000, M1Teeth, 0.0025, 0.01, M1Teeth/10000, 0.005, "M1") rotate M1Angle*y translate <MPosX,0.10,MPosY> }
     //object { Gear(M2Teeth/1000, M2Teeth, 0.0025, 0.01, M2Teeth/10000, 0.005, "M2") rotate M2Angle*y translate <MPosX,0.08,MPosY> }
     object { Gear(M3Teeth/1000, M3Teeth, 0.0025, 0.01, M3Teeth/10000, 0.005, "M3") rotate M3Angle*y translate <MPosX,0.06,MPosY> }
+
+    object { Gear(B0Teeth/1000, B0Teeth, 0.0025, 0.005, B0Teeth/10000, 0.01, "B0") rotate B0Angle*y translate <0,PlanetHeight-MA1Teeth/1000-0.01,0> pigment { Yellow } }
+    union {
+        object { Gear(MB3Teeth/1000, MB3Teeth, 0.0025, 0.005, MB3Teeth/10000, 0.0025, "MB3") rotate MB3Angle*y translate <0,PlanetHeight-MA1Teeth/1000-0.01,BMBDist> pigment { Yellow } }
+        object { Gear(MB2Teeth/1000, MB2Teeth, 0.0025, 0.005, MB2Teeth/10000, 0.0025, "MB2") rotate MB2Angle*y translate <0,PlanetHeight-MA1Teeth/1000-0.005,BMBDist> pigment { Yellow } }
+        object { CrownGear(MA1Teeth/1000, MA1Teeth, 0.0025, 0.005, MA1Teeth/10000, 0.0025, "MA1") rotate MA1Angle*y rotate 90*x translate <0,PlanetHeight,BMBDist+MB2Teeth/1000+0.0025> pigment { Yellow } }
+
+        cylinder { <0,PlanetHeight-MA1Teeth/1000-0.005,BMBDist>, <0,PlanetHeight,BMBDist>, 0.0025 texture { T_Brass_5C } }
+
+        rotate B3Angle*y
+    }
     
     texture { T_Brass_5D }
 }
